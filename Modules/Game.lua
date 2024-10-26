@@ -2,10 +2,12 @@
 local Players = game:GetService("Players")
 
 -- Variables
-local GameController = {}
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local MainFrame = PlayerGui:WaitForChild("MainGui").MainFrame
+
+-- Modules
+local GameController = {}
 
 -- Functions
 local function FetchBallVisual(): Instance
@@ -85,7 +87,7 @@ end
 local function FetchHole(): string
     local Scoreboard = MainFrame.Playing.Scoreboard
     
-    for _, Hole in Scoreboard.TopBar.Holes:GetChildren() do
+    for _, Hole in Scoreboard.Container.TopBar.Holes:GetChildren() do
         if Hole.Title.TextColor3.R == 1 then
             return Hole.Title.Text
         end

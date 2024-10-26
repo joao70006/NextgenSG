@@ -14,6 +14,6 @@ end
 
 _G.Require = Require
 
-Load("InputBegan")
+Load("Input/InputBegan")
 
 _G.Loaded = true
