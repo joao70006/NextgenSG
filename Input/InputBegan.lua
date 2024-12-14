@@ -2,7 +2,7 @@
 local UserInputService = game:GetService("UserInputService")
 
 -- Modules
-local KeyFunctions = _G.Require('Input/KeyFunctions')
+local KeyFunctions = _G.Modules.KeyFunctions
 
 -- Functions
 if _G.Loaded then

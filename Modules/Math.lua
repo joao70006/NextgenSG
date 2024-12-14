@@ -4,7 +4,6 @@
 
 -- Modules
 local MathController = {}
-local GameController = _G.Require('Modules/Game')
 
 -- Functions
 local function CalculatePower(Distance: number): number
@@ -12,6 +11,7 @@ local function CalculatePower(Distance: number): number
 end
 
 local function CalculateDistance(TargetPosition: Vector3): number
+    local GameController = _G.Modules.Game
     local LocalBall = GameController.FetchLocalBall()
 
     if not LocalBall then
@@ -26,6 +26,7 @@ local function CalculateDistance(TargetPosition: Vector3): number
 end
 
 local function CalculateDirection(TargetPosition: Vector3): Vector3 
+    local GameController = _G.Modules.Game
     local LocalBall = GameController.FetchLocalBall()
 
     if not LocalBall then

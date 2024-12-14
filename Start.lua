@@ -6,14 +6,18 @@ local function Load(Path: string, Silent: boolean): ()
     return loadstring(game:HttpGet(`http://127.0.0.1:5500/{Path}.lua`, true))()
 end
 
-local function Require(Path: string): ()
-    local Module = Load(Path, true)
+_G.Modules = {}
 
-    return Module
+_G.Modules['KeyFunctions'] = Load('Input/KeyFunctions')
+
+-- Require Modules
+for _, Path in listfiles("SGMain/Modules") do
+    local ModuleName = Path:sub(16, -5)
+
+    _G.Modules[ModuleName] = Load(`Modules/{ModuleName}`)
 end
 
-_G.Require = Require
-
+ -- Initiate InputBegan
 Load("Input/InputBegan")
 
 _G.Loaded = true

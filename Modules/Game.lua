@@ -4,7 +4,17 @@ local Players = game:GetService("Players")
 -- Variables
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
-local MainFrame = PlayerGui:WaitForChild("MainGui").MainFrame
+local MainFrame do
+    if PlayerGui:FindFirstChild("MainGui") then
+        MainFrame = PlayerGui.MainGui.MainFrame
+    elseif not PlayerGui:FindFirstChild("MainGui") then
+        task.spawn(function()
+            repeat task.wait(1/4) until PlayerGui:FindFirstChild("MainGui")
+
+            MainFrame = PlayerGui.MainGui.MainFrame
+        end)
+    end
+end
 
 -- Modules
 local GameController = {}
@@ -38,7 +48,7 @@ local function FetchBallVisual(): Instance
     return BallVisual
 end
 
-local function FetchLocalBall()
+local function FetchLocalBall(): Part
     local BallVisual = FetchBallVisual()
 
     if not BallVisual then
@@ -77,6 +87,10 @@ local function FetchPower(): (number, boolean)
     return PowerValue, IsActive
 end
 
+local function FetchLastPower(): number
+    return MainFrame.Mechanics.Power.Container.LastPower.Value
+end
+
 local function FetchMap(): string
     local Scoreboard = MainFrame.Playing.Scoreboard
     local Map = Scoreboard.Container.BottomBar.Map.Text
@@ -94,9 +108,24 @@ local function FetchHole(): string
     end
 end
 
+local function FetchIfScored(): boolean
+    return MainFrame.Playing.Scored.Position.Y.Scale ~= 1.3
+end
+
+local function FetchHolePosition(): Vector3
+    local Hole = FetchHole()
+    local Map = FetchMap()
+    local PhysicalHole = workspace[Map].Holes[Hole].Finish.Part
+
+    return PhysicalHole:GetPivot().Position
+end
+
+GameController.FetchHolePosition = FetchHolePosition
 GameController.FetchMap = FetchMap
 GameController.FetchHole = FetchHole
 GameController.FetchLocalBall = FetchLocalBall
-GameController.FetchCurrentPower = FetchPower
+GameController.FetchLastPower = FetchLastPower
+GameController.FetchPower = FetchPower
+GameController.FetchIfScored = FetchIfScored
 
 return GameController

@@ -7,10 +7,10 @@ local Camera = workspace.CurrentCamera
 
 -- Modules
 local AutomationController = {}
-local GameController = _G.Require("Modules/Game")
 
 -- Functions
 local function FetchMovementNeeded(TargetDirection: Vector3): ()
+    local GameController = _G.Modules.Game
     local LocalBall = GameController.FetchLocalBall()
     
     if not LocalBall then
@@ -28,8 +28,11 @@ local function FetchMovementNeeded(TargetDirection: Vector3): ()
 end
 
 local function InsertPower(TargetPower: number): ()
-    local CurrentPower, IsActive = GameController.FetchCurrentPower()
-    local LastDistance
+    local GameController = _G.Modules.Game
+    local SettingsController = _G.Modules.Settings
+    local HoleSettings = SettingsController.FetchHoleSettings()
+    local CurrentPower, IsActive = GameController.FetchPower()
+    local LastDifference
     local Distance = 100
 
     if not IsActive then
@@ -37,20 +40,38 @@ local function InsertPower(TargetPower: number): ()
     end
 
     while RunService.RenderStepped:Wait() do
-        if UserInputService:IsMouseButtonPressed("MouseButton2") or (LastDistance and math.abs(LastDistance) <= 0.001) then
+        if UserInputService:IsMouseButtonPressed("MouseButton2") or (LastDifference and math.abs(LastDifference) <= 0.001) then
             break
         end
 
-        CurrentPower = GameController.FetchCurrentPower()
+        CurrentPower = GameController.FetchPower()
         Distance = (TargetPower - CurrentPower)
+        Distance = math.ceil(Distance)
         
-        UserInputService.MouseDeltaSensitivity = math.abs(Distance) <= 0.3 and math.abs(Distance) + 0.01 or 2 
+        if Distance < 1 and Distance > -1 then
+            if Distance > 0 then
+                Distance = 1
+            elseif Distance <= 0 then
+                Distance = -1
+            end
+        end
 
-        LastDistance = Distance
+        local Difference = (TargetPower - CurrentPower)
+        
+        UserInputService.MouseDeltaSensitivity = math.abs(Difference) <= 3 and Difference * 5 + 0.001 or 3
+
+        LastDifference = Difference
         mousemoverel(math.ceil(Distance), 0)
     end
 
     UserInputService.MouseDeltaSensitivity = 1
+
+    if HoleSettings.HoldToRelease then
+        repeat
+            task.wait()
+        until
+            not UserInputService:IsKeyDown("Q") and not UserInputService:IsKeyDown("X")
+    end
 
     mouse1click()
 end
@@ -83,25 +104,67 @@ local function AlignAim(TargetDirection: Vector3): ()
     end
 end
 
-local function CopyDirection(): ()
+local function FetchDirection(ShouldCopy: boolean): Vector3
     local Direction = Camera.CFrame.LookVector * Vector3.new(1, 0, 1)
 
-    setclipboard(`Vector3.new({Direction})`)
+    if ShouldCopy then
+        setclipboard(`Vector3.new({Direction})`)
+    end
+
+    return Direction
 end
 
-local function CopyPosition(): ()
+local function FetchPosition(ShouldCopy: boolean): ()
+    local GameController = _G.Modules.Game
     local LocalBall = GameController.FetchLocalBall()
     
     if not LocalBall then
         return warn('LocalBall not found | 05')
     end
-
+    
     local Position = LocalBall:GetPivot().Position
-    setclipboard(`Vector3.new({Position})`)
+    
+    if ShouldCopy then
+        setclipboard(`Vector3.new({Position})`)    
+    end
+
+    return Position
 end
 
-AutomationController.CopyDirection = CopyDirection
-AutomationController.CopyPosition = CopyPosition
+local function FetchNearestCheckpoint(): (table, number)
+    local SettingsController = _G.Modules.Settings
+    local GameController = _G.Modules.Game
+    local HoleSettings = SettingsController.FetchHoleSettings()
+    local LocalBall = GameController.FetchLocalBall()
+    local Checkpoints = HoleSettings.Checkpoints and HoleSettings.Checkpoints or {}
+
+    if not HoleSettings or HoleSettings and #Checkpoints < 1 then
+        return
+    end 
+
+    if not LocalBall then
+        return
+    end
+
+    local Origin = LocalBall:GetPivot().Position
+    local SmallestDistance, NearestCheckpoint = math.huge, nil
+
+    for _, Checkpoint in Checkpoints do
+        local Position = Checkpoint.Position
+        local Distance = (Position - Origin).Magnitude
+
+        if Distance < SmallestDistance then
+            SmallestDistance = Distance
+            NearestCheckpoint = Checkpoint
+        end
+    end
+
+    return NearestCheckpoint, SmallestDistance
+end
+
+AutomationController.FetchNearestCheckpoint = FetchNearestCheckpoint
+AutomationController.FetchDirection = FetchDirection
+AutomationController.FetchPosition = FetchPosition
 AutomationController.AlignAim = AlignAim
 AutomationController.InsertPower = InsertPower
 

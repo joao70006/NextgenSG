@@ -1,0 +1,4 @@
+local PowerFunctions = {
+}
+
+return PowerFunctions
