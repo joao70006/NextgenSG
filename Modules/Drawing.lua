@@ -7,6 +7,10 @@ local DrawingController = {}
 
 -- Functions
 local function DrawLocalLineOfSight(Checkpoint: table, Duration: number): Instance
+    if not Checkpoint.Direction then
+        return
+    end
+
     local AutomationController = _G.Modules.Automation
     local LineOfSight = Instance.new("Part")
     LineOfSight.Name = `LocalLineOfSight`
@@ -71,6 +75,10 @@ local function DrawCheckpoint(Index: number, Checkpoint: table, Duration: number
             Folder.Name = 'Checkpoints'
             Folder.Parent = workspace
         end
+    end
+
+    if not Checkpoint.Position or not Checkpoint.Direction then
+        return
     end
 
     local Origin = Checkpoint.Position

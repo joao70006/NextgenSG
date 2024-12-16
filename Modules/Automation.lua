@@ -44,6 +44,12 @@ local function InsertPower(TargetPower: number): ()
             break
         end
 
+        if UserInputService:IsKeyDown("L") then
+            UserInputService.MouseDeltaSensitivity = 1
+            
+            return
+        end
+
         CurrentPower = GameController.FetchPower()
         Distance = (TargetPower - CurrentPower)
         Distance = math.ceil(Distance)

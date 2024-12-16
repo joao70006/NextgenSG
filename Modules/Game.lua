@@ -34,7 +34,7 @@ local function FetchBallVisual(): Instance
             local NametagContent = Nametag.TextLabel.Text
     
             if NametagContent == 'YOU' then
-                return Ball
+                return Ball.Anchor
             end
         end
     end
@@ -55,7 +55,7 @@ local function FetchLocalBall(): Part
         return
     end
 
-    local Origin = BallVisual:GetPivot().Position * Vector3.new(1, 0, 1)
+    local Origin = BallVisual:GetPivot().Position
     local NearestDistance, NearestBall = math.huge, nil
 
     for _, Ball in workspace:GetChildren() do
@@ -63,7 +63,7 @@ local function FetchLocalBall(): Part
             continue
         end
 
-        local CurrentBallPosition = Ball:GetPivot().Position * Vector3.new(1, 0, 1)
+        local CurrentBallPosition = Ball:GetPivot().Position
         local DistanceFromOrigin = (CurrentBallPosition - Origin).Magnitude
     
         if DistanceFromOrigin < NearestDistance then
@@ -102,6 +102,10 @@ local function FetchHole(): string
     local Scoreboard = MainFrame.Playing.Scoreboard
     
     for _, Hole in Scoreboard.Container.TopBar.Holes:GetChildren() do
+        if not Hole:IsA("Frame") then
+            continue
+        end
+        
         if Hole.Title.TextColor3.R == 1 then
             return Hole.Title.Text
         end
@@ -123,6 +127,7 @@ end
 GameController.FetchHolePosition = FetchHolePosition
 GameController.FetchMap = FetchMap
 GameController.FetchHole = FetchHole
+GameController.FetchBallVisual = FetchBallVisual
 GameController.FetchLocalBall = FetchLocalBall
 GameController.FetchLastPower = FetchLastPower
 GameController.FetchPower = FetchPower

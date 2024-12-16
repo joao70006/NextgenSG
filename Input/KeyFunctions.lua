@@ -43,11 +43,27 @@ local KeyFunctions = {
         DrawingController.DrawCheckpoint(Index, NearestCheckpoint, 10, {Color = Color3.new(1, 0, 0)})
     end,
 
+    ['C'] = function()
+        local AutomationController = _G.Modules.Automation
+        local GameController = _G.Modules.Game
+        local MathController = _G.Modules.Math
+
+        local HolePosition = GameController.FetchHolePosition()  
+        local LocalBallPosition = GameController.FetchLocalBall():GetPivot().Position
+        local Distance = (LocalBallPosition * Vector3.new(1, 0, 1) - HolePosition * Vector3.new(1, 0, 1)).Magnitude
+        local AimDirection = CFrame.lookAt(LocalBallPosition, HolePosition).LookVector * Vector3.new(1, 0, 1)
+        local Power = MathController.CalculatePower(Distance)
+
+        AutomationController.AlignAim(AimDirection)
+        AutomationController.InsertPower(Power)
+    end,
+
     ['Q'] = function()
         local AutomationController = _G.Modules.Automation
         local GameController = _G.Modules.Game
         local MathController = _G.Modules.Math
-        
+        local DrawingController = _G.Modules.Drawing
+
         local AimDirection, Power
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
 
@@ -96,6 +112,8 @@ local KeyFunctions = {
             AimDirection = CFrame.lookAt(LocalPosition, GoalPosition).LookVector * Vector3.new(1, 0, 1)
         end
 
+        --DrawingController.DrawCheckpoint(0, NearestCheckpoint, 3, {Color = Color3.new(0, 0, 0)})
+        
         AutomationController.AlignAim(AimDirection)
         AutomationController.InsertPower(Power)
         AutomationController.LastUsedCheckpoint = NearestCheckpoint
