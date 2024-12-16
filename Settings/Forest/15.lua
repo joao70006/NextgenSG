@@ -665,6 +665,18 @@ local HoleSettings = {
           AimToHole = true,
       },
 
+      [111] = {
+          Position = Vector3.new(222.83152770996094, 111.51731872558594, -522.1798706054688),
+          Power = 93.4,
+          AimToHole = true,
+      },
+
+      [112] = {
+          Position = Vector3.new(224.08154296875, 111.51732635498047, -525.5392456054688),
+          Power = 93.2,
+          AimToHole = true,
+      },
+
     },
 
 }

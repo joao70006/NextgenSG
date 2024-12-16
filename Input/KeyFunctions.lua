@@ -1,10 +1,64 @@
 -- Services
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Modules
 
 -- Variables--
 local KeyFunctions = {
+    ['One'] = function()
+        local GameController = _G.Modules.Game
+        
+        local LastHole = ReplicatedStorage.Remotes.Admin.LastHole
+        local NextHole = ReplicatedStorage.Remotes.Admin.NextHole
+        
+        local CurrentHole = GameController.FetchHole()
+
+        ReplicatedStorage.Remotes.Game.Disconnect:FireServer()
+
+        if CurrentHole == '18' then
+            LastHole:FireServer()
+
+            task.wait(1/4)
+
+            NextHole:FireServer()
+        else
+            NextHole:FireServer()
+
+            task.wait(1/4)
+
+            LastHole:FireServer()
+        end
+
+        task.wait(1/10)
+
+        ReplicatedStorage.Remotes.Game.Play:FireServer()
+    end,
+
+    ['E'] = function()
+        local DrawingController = _G.Modules.Drawing
+        local MathController = _G.Modules.Math
+        local AutomationController = _G.Modules.Automation
+        local GameController = _G.Modules.Game
+
+        local CurrentPower = GameController.FetchPower()
+        local Origin = AutomationController.FetchPosition()
+        local Distance = MathController.CalculateDistance(CurrentPower)
+        local LookVector = workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)
+
+        local FinalPosition = Origin + LookVector * Distance
+
+        print(Origin, FinalPosition)
+
+        local NewCheckpoint = {
+            Position = FinalPosition,
+        }
+
+        repeat task.wait() until not UserInputService:IsKeyDown("E")
+
+        DrawingController.DrawCheckpoint('', NewCheckpoint, 1, {Color = Color3.new(0.4, 0.5, 1)})
+    end,
+
     ['Z'] = function()
         local AutomationController = _G.Modules.Automation
 
@@ -66,33 +120,38 @@ local KeyFunctions = {
 
         local AimDirection, Power
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
+        local Checkpoint = MathController.CalculateBezierAverage() or NearestCheckpoint
 
-        if not NearestCheckpoint then
+        if UserInputService:IsKeyDown("LeftControl") then
+            Checkpoint = NearestCheckpoint
+        end
+
+        if not Checkpoint then
             return
         end
 
         -- Patch Position
-        NearestCheckpoint.Position = AutomationController.FetchPosition()
+        Checkpoint.Position = AutomationController.FetchPosition()
 
         -- Execute Checkpoint
-        if NearestCheckpoint.AutoHole or NearestCheckpoint.AimToHole then
+        if Checkpoint.AutoHole or Checkpoint.AimToHole then
             local HolePosition = GameController.FetchHolePosition()  
             local LocalBallPosition = GameController.FetchLocalBall():GetPivot().Position
             local Distance = (LocalBallPosition * Vector3.new(1, 0, 1) - HolePosition * Vector3.new(1, 0, 1)).Magnitude
             
             AimDirection = CFrame.lookAt(LocalBallPosition, HolePosition).LookVector * Vector3.new(1, 0, 1)
             
-            if NearestCheckpoint.AutoHole then
+            if Checkpoint.AutoHole then
                 Power = MathController.CalculatePower(Distance)
-            elseif not NearestCheckpoint.AutoHole then
-                Power = NearestCheckpoint.Power
+            elseif not Checkpoint.AutoHole then
+                Power = Checkpoint.Power
             end
-        elseif not NearestCheckpoint.AutoHole then
-            AimDirection = NearestCheckpoint.Direction
-            Power = NearestCheckpoint.Power
+        elseif not Checkpoint.AutoHole then
+            AimDirection = Checkpoint.Direction
+            Power = Checkpoint.Power
         end
 
-        if NearestCheckpoint.PowerFunction then
+        if Checkpoint.PowerFunction then
             local Map = GameController.FetchMap()
             local Hole = GameController.FetchHole()
             local PowerFunctions = loadstring(game:HttpGet('http://127.0.0.1:5500/Settings/PowerFunctions.lua', true))()
@@ -104,9 +163,9 @@ local KeyFunctions = {
             Power = PowerFunction(Distance)
         end
 
-        if NearestCheckpoint.Goal then
+        if Checkpoint.Goal then
             local LocalPosition = AutomationController.FetchPosition()
-            local GoalPosition = NearestCheckpoint.Goal
+            local GoalPosition = Checkpoint.Goal
             local Distance = (LocalPosition - GoalPosition).Magnitude
             Power = MathController.CalculatePower(Distance)
             AimDirection = CFrame.lookAt(LocalPosition, GoalPosition).LookVector * Vector3.new(1, 0, 1)
@@ -116,7 +175,8 @@ local KeyFunctions = {
         
         AutomationController.AlignAim(AimDirection)
         AutomationController.InsertPower(Power)
-        AutomationController.LastUsedCheckpoint = NearestCheckpoint
+        AutomationController.LastUsedCheckpoint = Checkpoint
+    
     end,
 
     ['S'] = function()

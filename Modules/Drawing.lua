@@ -77,30 +77,40 @@ local function DrawCheckpoint(Index: number, Checkpoint: table, Duration: number
         end
     end
 
-    if not Checkpoint.Position or not Checkpoint.Direction then
+    if not Checkpoint.Position then
         return
     end
 
     local Origin = Checkpoint.Position
     local Ball = DrawBall(Index, Checkpoint)
-    local LineOfSight = DrawLineOfSight(Index, Checkpoint)
+    local LineOfSight
 
-    local Goal = Origin + Checkpoint.Direction * 101
-    local Mid = (Origin + Goal) / 2
-    local Cframe = CFrame.lookAt(Mid, Goal)
-
-    LineOfSight:PivotTo(Cframe)
+    if Checkpoint.Direction then
+        LineOfSight = DrawLineOfSight(Index, Checkpoint)
+    
+        local Goal = Origin + Checkpoint.Direction * 101
+        local Mid = (Origin + Goal) / 2
+        local Cframe = CFrame.lookAt(Mid, Goal)
+    
+        LineOfSight:PivotTo(Cframe)
+    end
 
     if Properties then
         for Property, Value in Properties do
             Ball[Property] = Value
-            LineOfSight[Property] = Value
+
+            if LineOfSight then
+                LineOfSight[Property] = Value
+            end
         end
     end
 
     task.delay(Duration, function()
         Ball:Destroy()
-        LineOfSight:Destroy()
+
+        if LineOfSight then
+            LineOfSight:Destroy()
+        end
     end)
 end
 
