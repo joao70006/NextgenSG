@@ -614,6 +614,18 @@ local HoleSettings = {
           AimToHole = true,
       },
 
+      [103] = {
+          Power = 95.2,
+          Position = Vector3.new(-522.115478515625, 145.6719512939453, -3078.71630859375),
+          AimToHole = true,
+      },
+
+      [104] = {
+          Power = 95,
+          Position = Vector3.new(-522.482666015625, 145.67193603515625, -3076.37451171875),
+          AimToHole = true,
+      },
+
     },
 
     AnchorPoints = {

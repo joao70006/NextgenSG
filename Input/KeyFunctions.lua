@@ -76,10 +76,16 @@ local KeyFunctions = {
         local AutomationController = _G.Modules.Automation
         local DrawingController = _G.Modules.Drawing
         local SettingsController = _G.Modules.Settings
+        local GameController = _G.Modules.Game
+
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint(true)
 
         if not NearestCheckpoint then
-            return
+            NearestCheckpoint = {
+                Position = AutomationController.FetchPosition(),
+                Direction = AutomationController.FetchDirection(),
+                Power = GameController.FetchPower()
+            }
         end
 
         -- Patch Position

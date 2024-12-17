@@ -40,7 +40,7 @@ local function InsertPower(TargetPower: number): ()
     end
 
     while RunService.RenderStepped:Wait() do
-        if UserInputService:IsMouseButtonPressed("MouseButton2") or (LastDifference and math.abs(LastDifference) <= 0.001) then
+        if UserInputService:IsMouseButtonPressed("MouseButton2") or (LastDifference and math.abs(LastDifference) <= 0.01) then
             break
         end
 
