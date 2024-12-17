@@ -18,6 +18,7 @@ local HoleSettings = {
 
     },
 
+    HoldToRelease = true,
 }
 
 return HoleSettings

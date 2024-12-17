@@ -46,9 +46,7 @@ local KeyFunctions = {
         local Distance = MathController.CalculateDistance(CurrentPower)
         local LookVector = workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)
 
-        local FinalPosition = Origin + LookVector * Distance
-
-        print(Origin, FinalPosition)
+        local FinalPosition = Origin + (LookVector * Distance)
 
         local NewCheckpoint = {
             Position = FinalPosition,
@@ -120,10 +118,12 @@ local KeyFunctions = {
 
         local AimDirection, Power
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
-        local Checkpoint = MathController.CalculateBezierAverage() or NearestCheckpoint
-
+        local Checkpoint = NearestCheckpoint
+        
         if UserInputService:IsKeyDown("LeftControl") then
-            Checkpoint = NearestCheckpoint
+            local OptimalCheckpoint = MathController.CalculateBezierAverage()
+            
+            Checkpoint = OptimalCheckpoint
         end
 
         if not Checkpoint then
@@ -167,7 +167,7 @@ local KeyFunctions = {
             local LocalPosition = AutomationController.FetchPosition()
             local GoalPosition = Checkpoint.Goal
             local Distance = (LocalPosition - GoalPosition).Magnitude
-            Power = MathController.CalculatePower(Distance)
+            Power = Checkpoint.Power or MathController.CalculatePower(Distance)
             AimDirection = CFrame.lookAt(LocalPosition, GoalPosition).LookVector * Vector3.new(1, 0, 1)
         end
 
