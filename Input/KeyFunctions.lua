@@ -80,7 +80,7 @@ local KeyFunctions = {
 
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint(true)
 
-        if not NearestCheckpoint then
+        if GameController.FetchPower() ~= 0 then                
             NearestCheckpoint = {
                 Position = AutomationController.FetchPosition(),
                 Direction = AutomationController.FetchDirection(),

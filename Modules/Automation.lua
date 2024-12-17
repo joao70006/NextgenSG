@@ -96,9 +96,9 @@ local function AlignAim(TargetDirection: Vector3): ()
 
         MovementNeeded, OnScreen = FetchMovementNeeded(TargetDirection)
 
-        if not OnScreen then
-            continue
-        end
+        --if not OnScreen then
+        --    continue
+        --end
 
         if math.abs(MovementNeeded.X) <= 0.6 then
             break
