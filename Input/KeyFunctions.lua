@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Modules
 
 -- Variables--
+local Offset = Vector3.zero
 local KeyFunctions = {
     ['One'] = function()
         local GameController = _G.Modules.Game
@@ -35,26 +36,78 @@ local KeyFunctions = {
         ReplicatedStorage.Remotes.Game.Play:FireServer()
     end,
 
+    ['Equals'] = function()
+        local Amount = 0.05
+
+        if UserInputService:IsKeyDown("LeftControl") then
+            Amount = 0.005
+        end
+
+        local AutomationController = _G.Modules.Automation
+        local NotificationsController = _G.Modules.Notifications
+        local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
+    
+        if not NearestCheckpoint then
+            return
+        end
+
+        Offset += Vector3.new(Amount, 0, Amount)
+        NotificationsController.Notify(Offset.X, '')
+    end,
+
+    ['Minus'] = function()
+        local Amount = 0.05
+
+        if UserInputService:IsKeyDown("LeftControl") then
+            Amount = 0.005
+        end
+
+        local AutomationController = _G.Modules.Automation
+        local NotificationsController = _G.Modules.Notifications
+        local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
+    
+        if not NearestCheckpoint then
+            return
+        end
+
+        Offset -= Vector3.new(Amount, 0, Amount)
+        NotificationsController.Notify(Offset.X, '')
+    end,
+
     ['E'] = function()
         local DrawingController = _G.Modules.Drawing
         local MathController = _G.Modules.Math
         local AutomationController = _G.Modules.Automation
         local GameController = _G.Modules.Game
+        local NotificationsController = _G.Modules.Notifications
 
         local CurrentPower = GameController.FetchPower()
         local Origin = AutomationController.FetchPosition()
         local Distance = MathController.CalculateDistance(CurrentPower)
+        
         local LookVector = workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)
+        
+        local FinalPosition = Origin
+        local CurrentDistance = math.huge
 
-        local FinalPosition = Origin + (LookVector * Distance)
+        while math.abs(CurrentDistance) > 0.01 do
+            if UserInputService:IsKeyDown("L") then
+                break
+            end
+
+            CurrentDistance = Distance - ((Origin - FinalPosition).Magnitude)
+            FinalPosition += LookVector * CurrentDistance
+
+            task.wait()
+        end
 
         local NewCheckpoint = {
             Position = FinalPosition,
         }
-
+        
         repeat task.wait() until not UserInputService:IsKeyDown("E")
 
-        DrawingController.DrawCheckpoint('', NewCheckpoint, 1, {Color = Color3.new(0.4, 0.5, 1)})
+        DrawingController.DrawCheckpoint('', NewCheckpoint, 2, {Color = Color3.new(0.4, 0.5, 1)})
     end,
 
     ['Z'] = function()
@@ -66,10 +119,19 @@ local KeyFunctions = {
     ['F'] = function()
         local DrawingController = _G.Modules.Drawing
         local AutomationController = _G.Modules.Automation
+        local NotificationsController = _G.Modules.Notifications
+        local SettingsController = _G.Modules.Settings
+
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
 
         DrawingController.DrawCheckpoints(3)
         DrawingController.DrawLocalLineOfSight(NearestCheckpoint, 3)
+    
+        local Origin = AutomationController.FetchPosition()
+        local Distance = (Origin - NearestCheckpoint.Position).Magnitude
+        Distance = math.round(Distance * 1000) / 1000
+
+        NotificationsController.Notify('Distance', `D: {Distance} I: {SettingsController.FetchIndexOfCheckpoint(NearestCheckpoint)}`)
     end,
 
     ['X'] = function()
@@ -121,6 +183,7 @@ local KeyFunctions = {
         local GameController = _G.Modules.Game
         local MathController = _G.Modules.Math
         local DrawingController = _G.Modules.Drawing
+        local NotificationsController = _G.Modules.Notifications
 
         local AimDirection, Power
         local NearestCheckpoint = AutomationController.FetchNearestCheckpoint()
@@ -176,13 +239,14 @@ local KeyFunctions = {
             Power = Checkpoint.Power or MathController.CalculatePower(Distance)
             AimDirection = CFrame.lookAt(LocalPosition, GoalPosition).LookVector * Vector3.new(1, 0, 1)
         end
+        
+        AimDirection += Offset
 
         --DrawingController.DrawCheckpoint(0, NearestCheckpoint, 3, {Color = Color3.new(0, 0, 0)})
         
         AutomationController.AlignAim(AimDirection)
         AutomationController.InsertPower(Power)
         AutomationController.LastUsedCheckpoint = Checkpoint
-    
     end,
 
     ['S'] = function()

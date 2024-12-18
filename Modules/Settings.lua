@@ -127,7 +127,7 @@ local function FetchIndexOfCheckpoint(Checkpoint: table): number
     local HoleSettings = FetchHoleSettings()
 
     for Index, IteratedCheckpoint in HoleSettings.Checkpoints do
-        if IteratedCheckpoint == Checkpoint then
+        if IteratedCheckpoint.Position == Checkpoint.Position then
             return Index
         end
     end

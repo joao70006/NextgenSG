@@ -100,7 +100,7 @@ local function AlignAim(TargetDirection: Vector3): ()
         --    continue
         --end
 
-        if math.abs(MovementNeeded.X) <= 0.6 then
+        if math.abs(MovementNeeded.X) <= 0.5 then
             break
         end
 

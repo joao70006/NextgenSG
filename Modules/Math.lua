@@ -11,7 +11,7 @@ local function CalculatePower(Distance: number): number
 end
 
 local function CalculateDistance(Power: number): number
-    return (Power^2) * 0.075
+    return (Power^2) / (40/3)
 end
 
 local function CalculateDirection(TargetPosition: Vector3): Vector3 
